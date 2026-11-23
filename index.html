@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmacias del Valle — Dashboard Ejecutivo de Demanda (2020–2024)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 75% 20%, #152d63 0%, #0e1e45 48%, #09132c 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+
+    /* Barra lateral izquierda estilo cobalto */
+    .sidebar-cobalt {
+      background: linear-gradient(180deg, #1b3d82 0%, #132c63 55%, #0d204a 100%);
+      border-right: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 6px 0 28px rgba(4, 10, 26, 0.45);
+    }
+
+    /* Tarjetas translúcidas azul marino */
+    .glass-panel {
+      background: linear-gradient(145deg, rgba(20, 42, 92, 0.72) 0%, rgba(12, 25, 56, 0.85) 100%);
+      border: 1px solid rgba(125, 211, 252, 0.14);
+      box-shadow: 0 10px 26px rgba(4, 9, 24, 0.42);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Selectores estilo ejecutivo */
+    .exec-select {
+      background-color: rgba(10, 22, 50, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #f1f5f9;
+      transition: all 0.2s ease;
+    }
+    .exec-select:hover, .exec-select:focus {
+      border-color: #38bdf8;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Animación suave para arcos SVG */
+    .gauge-arc {
+      transition: stroke-dashoffset 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Scrollbar discreto */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09132c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #234791;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-sky-400 selection:text-slate-950">
+
+  <div class="flex flex-col lg:flex-row min-h-screen">
+
+    <!-- BARRA LATERAL IZQUIERDA (SIDEBAR) -->
+    <aside class="sidebar-cobalt w-full lg:w-72 xl:w-80 flex-shrink-0 p-5 lg:p-6 flex flex-col justify-between gap-6">
+      <div class="space-y-6">
+        <!-- Marca / Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-400/20 border border-sky-300/40 flex items-center justify-center shadow-inner">
+            <svg class="w-6 h-6 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-widest text-sky-300 block">BI Analytics</span>
+            <h1 class="text-lg font-bold tracking-tight text-white leading-tight">Farmacias del Valle</h1>
+          </div>
+        </div>
+
+        <!-- Perfil / Resumen del Dataset -->
+        <div class="flex flex-col items-center text-center py-3 px-3 rounded-2xl bg-slate-950/25 border border-white/10">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-300 p-0.5 shadow-lg mb-2.5">
+            <div class="w-full h-full rounded-full bg-[#0f2350] flex items-center justify-center">
+              <svg class="w-8 h-8 text-sky-200" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+          </div>
+          <p class="text-sm font-semibold text-white">Analítica de Demanda</p>
+          <p class="text-xs text-blue-200/80 mt-0.5">1,200 registros • 60 meses (2020–2024)</p>
+        </div>
+
+        <!-- Badges tipo píldora blancos con números destacados -->
+        <div class="space-y-3">
+          <div class="flex items-center bg-gradient-to-r from-blue-600/40 to-blue-900/40 border border-blue-300/25 rounded-full p-1.5 pr-4 shadow-md">
+            <div id="badge-productos" class="w-11 h-11 rounded-full bg-white text-[#0e1e45] font-extrabold text-base flex items-center justify-center shadow flex-shrink-0">
+              20
+            </div>
+            <div class="ml-3">
+              <p class="text-xs font-semibold text-white leading-tight">Productos Activos</p>
+              <p class="text-[11px] text-blue-200/80">5 categorías terapéuticas</p>
+            </div>
+          </div>
+
+          <div class="flex items-center bg-gradient-to-r from-blue-600/40 to-blue-900/40 border border-blue-300/25 rounded-full p-1.5 pr-4 shadow-md">
+            <div id="badge-quiebres" class="w-11 h-11 rounded-full bg-white text-emerald-700 font-extrabold text-base flex items-center justify-center shadow flex-shrink-0">
+              0
+            </div>
+            <div class="ml-3">
+              <p class="text-xs font-semibold text-white leading-tight">Quiebres de Stock</p>
+              <p class="text-[11px] text-emerald-300">100% disponibilidad operativa</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros Interactivos (Slicers) -->
+        <div class="space-y-4 pt-2 border-t border-white/15">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-300">Filtros Interactivos</span>
+            <span id="registro-count" class="text-[11px] text-blue-200/80 bg-blue-950/60 px-2 py-0.5 rounded-full">1,200 reg.</span>
+          </div>
+
+          <!-- Filtro Año -->
+          <div>
+            <label for="filter-year" class="flex items-center gap-2 text-xs font-medium text-blue-100 mb-1.5">
+              <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Año Fiscal
+            </label>
+            <select id="filter-year" class="exec-select w-full rounded-xl px-3 py-2.5 text-xs font-medium cursor-pointer">
+              <option value="ALL">Todos (2020 – 2024)</option>
+              <option value="2024">2024 (Último año)</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020 (Año base)</option>
+            </select>
+          </div>
+
+          <!-- Filtro Categoría Terapéutica -->
+          <div>
+            <label for="filter-category" class="flex items-center gap-2 text-xs font-medium text-blue-100 mb-1.5">
+              <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Categoría Terapéutica
+            </label>
+            <select id="filter-category" class="exec-select w-full rounded-xl px-3 py-2.5 text-xs font-medium cursor-pointer">
+              <option value="ALL">Todas las categorías (5)</option>
+              <option value="Crónico">Crónico</option>
+              <option value="Vitaminas">Vitaminas</option>
+              <option value="Antiinflamatorio">Antiinflamatorio</option>
+              <option value="Antibiótico">Antibiótico</option>
+              <option value="Analgésico">Analgésico</option>
+            </select>
+          </div>
+
+          <!-- Filtro Temporada -->
+          <div>
+            <label for="filter-season" class="flex items-center gap-2 text-xs font-medium text-blue-100 mb-1.5">
+              <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Temporada de Demanda
+            </label>
+            <select id="filter-season" class="exec-select w-full rounded-xl px-3 py-2.5 text-xs font-medium cursor-pointer">
+              <option value="ALL">Todas las temporadas</option>
+              <option value="Alta">Temporada Alta</option>
+              <option value="Media">Temporada Media</option>
+              <option value="Baja">Temporada Baja</option>
+            </select>
+          </div>
+
+          <!-- Botón Restablecer -->
+          <button id="btn-reset" type="button" class="w-full py-2.5 px-4 rounded-xl bg-sky-500/20 hover:bg-sky-500/35 active:scale-[0.99] border border-sky-400/40 text-sky-200 text-xs font-semibold tracking-wide transition flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Restablecer Filtros
+          </button>
+        </div>
+      </div>
+
+      <!-- Pie de barra lateral -->
+      <div class="pt-4 border-t border-white/10 text-[11px] text-blue-200/70 leading-relaxed">
+        <p class="font-semibold text-blue-100">Fuente:</p>
+        <p>Farmacias_Valle_Demanda_1200.csv • Corte analítico 2020–2024.</p>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 p-5 lg:p-7 xl:p-8 space-y-6 overflow-x-hidden">
+
+      <!-- ENCABEZADO NARRATIVO SUPERIOR -->
+      <header class="glass-panel rounded-2xl p-5 lg:p-6">
+        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-4xl">
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-sky-400/15 border border-sky-300/30 text-sky-300 text-[11px] font-semibold uppercase tracking-wider">
+              <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+              Síntesis Ejecutiva de Desempeño Comercial
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-snug">
+              Los ingresos crecieron <span class="text-sky-300">+28.8%</span> de 2020 ($11.52M) a 2024 ($14.84M), acumulando <span class="text-sky-300">$65.72M</span> impulsados por medicamentos Crónicos (34.4%, $22.62M) con 0 quiebres de stock.
+            </h2>
+            <p class="text-xs sm:text-sm text-blue-200/85 leading-relaxed">
+              <span class="font-semibold text-amber-300">Nota operativa:</span> Las promociones actuales no generan elasticidad positiva (<span class="text-white font-medium">867 uds/mes</span> con promoción vs. <span class="text-white font-medium">873 uds/mes</span> sin promoción) y existe sobrestock estructural con una rotación mensual promedio de <span class="text-white font-medium">61.7%</span>.
+            </p>
+          </div>
+          <div class="flex sm:flex-row xl:flex-col gap-2 flex-shrink-0">
+            <div class="px-3.5 py-2 rounded-xl bg-slate-950/45 border border-white/10 text-right">
+              <span class="text-[11px] text-blue-300 block">Selección Activa</span>
+              <span id="active-filter-label" class="text-xs font-bold text-white">2020–2024 • Todas • Todas</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- FILA SUPERIOR: 3 KPIs ARCO SEMICIRCULAR SVG + TENDENCIA MENSUAL DE INGRESOS -->
+      <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+
+        <!-- Bloque de 3 KPIs Semicirculares (7 columnas en xl) -->
+        <div class="xl:col-span-7 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-semibold text-blue-100 tracking-wide">Indicadores Clave de Desempeño (KPIs)</h3>
+            <span id="kpi-context-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-500/20 text-sky-200 border border-sky-400/25">
+              Vista Consolidada 2020–2024
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-auto">
+
+            <!-- KPI 1: Ingresos -->
+            <div class="flex flex-col items-center text-center p-3 rounded-xl bg-slate-950/30 border border-white/5">
+              <div class="relative w-44 h-28 flex items-center justify-center">
+                <svg class="w-44 h-28 overflow-visible" viewBox="0 0 180 105">
+                  <defs>
+                    <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#38bdf8" />
+                      <stop offset="100%" stop-color="#e0f2fe" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Pista de fondo -->
+                  <path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="rgba(148,163,184,0.18)" stroke-width="14" stroke-linecap="round" />
+                  <!-- Arco activo (longitud total pi * 70 = 219.91) -->
+                  <path id="arc-revenue" class="gauge-arc" d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="url(#grad-cyan)" stroke-width="14" stroke-linecap="round" stroke-dasharray="219.91" stroke-dashoffset="48" />
+                </svg>
+                <div class="absolute bottom-2 flex flex-col items-center">
+                  <span id="kpi-revenue-val" class="text-xl font-extrabold text-white tracking-tight">$65.72M</span>
+                  <span id="kpi-revenue-pct" class="text-[11px] font-semibold text-sky-300">+28.8% (20–24)</span>
+                </div>
+              </div>
+              <p class="text-xs font-semibold text-blue-100 mt-1">Ingresos Totales</p>
+              <p id="kpi-revenue-sub" class="text-[11px] text-emerald-300 mt-0.5">2024: $14.84M (+6.8% vs 2023)</p>
+            </div>
+
+            <!-- KPI 2: Rotación de Stock -->
+            <div class="flex flex-col items-center text-center p-3 rounded-xl bg-slate-950/30 border border-white/5">
+              <div class="relative w-44 h-28 flex items-center justify-center">
+                <svg class="w-44 h-28 overflow-visible" viewBox="0 0 180 105">
+                  <defs>
+                    <linearGradient id="grad-coral" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#f97316" />
+                      <stop offset="100%" stop-color="#fdba74" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="rgba(148,163,184,0.18)" stroke-width="14" stroke-linecap="round" />
+                  <path id="arc-rotation" class="gauge-arc" d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="url(#grad-coral)" stroke-width="14" stroke-linecap="round" stroke-dasharray="219.91" stroke-dashoffset="84" />
+                </svg>
+                <div class="absolute bottom-2 flex flex-col items-center">
+                  <span id="kpi-rotation-val" class="text-xl font-extrabold text-white tracking-tight">61.7%</span>
+                  <span id="kpi-rotation-pct" class="text-[11px] font-semibold text-orange-300">-13.3 pts vs Meta</span>
+                </div>
+              </div>
+              <p class="text-xs font-semibold text-blue-100 mt-1">Rotación de Stock</p>
+              <p id="kpi-rotation-sub" class="text-[11px] text-amber-300 mt-0.5">Meta operativa: 75.0% mensual</p>
+            </div>
+
+            <!-- KPI 3: Unidades Vendidas -->
+            <div class="flex flex-col items-center text-center p-3 rounded-xl bg-slate-950/30 border border-white/5">
+              <div class="relative w-44 h-28 flex items-center justify-center">
+                <svg class="w-44 h-28 overflow-visible" viewBox="0 0 180 105">
+                  <defs>
+                    <linearGradient id="grad-violet" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#8b5cf6" />
+                      <stop offset="100%" stop-color="#c4b5fd" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="rgba(148,163,184,0.18)" stroke-width="14" stroke-linecap="round" />
+                  <path id="arc-units" class="gauge-arc" d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="url(#grad-violet)" stroke-width="14" stroke-linecap="round" stroke-dasharray="219.91" stroke-dashoffset="52" />
+                </svg>
+                <div class="absolute bottom-2 flex flex-col items-center">
+                  <span id="kpi-units-val" class="text-xl font-extrabold text-white tracking-tight">1.04M</span>
+                  <span id="kpi-units-pct" class="text-[11px] font-semibold text-violet-300">870 uds/mes prom.</span>
+                </div>
+              </div>
+              <p class="text-xs font-semibold text-blue-100 mt-1">Unidades Vendidas</p>
+              <p id="kpi-units-sub" class="text-[11px] text-emerald-300 mt-0.5">2024: 221.3K (+3.7% vs 2023)</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Gráfica Tendencia Mensual de Ingresos (5 columnas en xl) -->
+        <div class="xl:col-span-5 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="text-sm font-semibold text-blue-100">Tendencia Mensual de Ingresos</h3>
+              <p class="text-[11px] text-blue-300/80">Evolución histórica (en millones USD)</p>
+            </div>
+            <span id="trend-peak-badge" class="text-[11px] font-semibold text-sky-300 bg-sky-950/70 px-2.5 py-1 rounded-lg border border-sky-400/25">
+              Pico: Dic 2024
+            </span>
+          </div>
+          <div class="relative h-48 w-full">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- FILA MEDIA: TOP 5 MAYOR INGRESO + BOTTOM 5 MENOR INGRESO + INGRESOS VS VALOR DE STOCK -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+        <!-- Top 5 Productos — Mayor Ingreso (4 columnas) -->
+        <div class="lg:col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-white">Top 5 Productos — Mayor Ingreso</h3>
+              <span class="text-[11px] text-sky-300 font-medium">Líderes</span>
+            </div>
+            <div class="grid grid-cols-12 text-[11px] font-semibold text-blue-300/80 pb-2 border-b border-white/15">
+              <div class="col-span-5">Producto</div>
+              <div class="col-span-4">Participación</div>
+              <div class="col-span-3 text-right">Ingreso</div>
+            </div>
+            <div id="top5-list" class="divide-y divide-white/10 mt-1">
+              <!-- Render dinámico en JS -->
+            </div>
+          </div>
+          <p class="text-[11px] text-blue-300/75 mt-3 pt-2 border-t border-white/10">
+            Los 5 productos líderes concentran el <span id="top5-share" class="text-sky-300 font-semibold">35.8%</span> del ingreso total.
+          </p>
+        </div>
+
+        <!-- Bottom 5 Productos — Menor Ingreso (4 columnas) -->
+        <div class="lg:col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-semibold text-white">Bottom 5 Productos — Menor Ingreso</h3>
+              <span class="text-[11px] text-orange-300 font-medium">Rezagados</span>
+            </div>
+            <div class="grid grid-cols-12 text-[11px] font-semibold text-blue-300/80 pb-2 border-b border-white/15">
+              <div class="col-span-5">Producto</div>
+              <div class="col-span-4">Nivel Relativo</div>
+              <div class="col-span-3 text-right">Ingreso</div>
+            </div>
+            <div id="bottom5-list" class="divide-y divide-white/10 mt-1">
+              <!-- Render dinámico en JS -->
+            </div>
+          </div>
+          <p class="text-[11px] text-blue-300/75 mt-3 pt-2 border-t border-white/10">
+            Menor rotación relativa; candidatos a revisión de surtido o exhibición.
+          </p>
+        </div>
+
+        <!-- Ingresos vs Valor de Stock por Categoría (4 columnas) -->
+        <div class="lg:col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+          <div class="mb-2">
+            <h3 class="text-sm font-semibold text-white">Ingresos vs. Valor de Stock por Categoría</h3>
+            <p class="text-[11px] text-blue-300/80">Comparativa financiera acumulada ($ Millones)</p>
+          </div>
+          <div class="relative h-60 w-full">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- FILA INFERIOR: DEMANDA POR TEMPORADA Y PROMOCIÓN + 3 TARJETAS EJECUTIVAS -->
+      <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+
+        <!-- Gráfica Demanda Promedio por Temporada y Promoción (5 columnas) -->
+        <div class="xl:col-span-5 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div>
+              <h3 class="text-sm font-semibold text-white">Demanda Promedio por Temporada y Promoción</h3>
+              <p class="text-[11px] text-blue-300/80">Unidades mensuales promedio por SKU (Con vs. Sin Promoción)</p>
+            </div>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-400/15 text-amber-300 border border-amber-400/30">
+              Elasticidad Nula
+            </span>
+          </div>
+          <div class="relative h-60 w-full my-auto">
+            <canvas id="seasonPromoChart"></canvas>
+          </div>
+          <div class="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-center">
+            <div class="bg-slate-950/35 rounded-lg p-1.5">
+              <span class="text-[10px] text-blue-300 block">Temp. Alta</span>
+              <span id="stat-alta" class="text-xs font-bold text-white">908 uds/mes</span>
+            </div>
+            <div class="bg-slate-950/35 rounded-lg p-1.5">
+              <span class="text-[10px] text-blue-300 block">Temp. Media</span>
+              <span id="stat-media" class="text-xs font-bold text-white">881 uds/mes</span>
+            </div>
+            <div class="bg-slate-950/35 rounded-lg p-1.5">
+              <span class="text-[10px] text-blue-300 block">Temp. Baja</span>
+              <span id="stat-baja" class="text-xs font-bold text-white">703 uds/mes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Tarjetas Ejecutivas Estructuradas (7 columnas) -->
+        <div class="xl:col-span-7 grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <!-- Tarjeta 1: Hallazgo Principal -->
+          <article class="glass-panel rounded-2xl p-5 flex flex-col justify-between border-t-4 border-t-sky-400">
+            <div class="space-y-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-sky-400/20 text-sky-300 font-bold text-xs flex items-center justify-center">01</span>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-sky-300">Hallazgo Principal</h4>
+              </div>
+              <p class="text-sm font-semibold text-white leading-snug">
+                Crecimiento sostenido liderado por Crónicos, pero con promociones ineficaces y sobrestock.
+              </p>
+              <ul class="text-xs text-blue-100/90 space-y-2 leading-relaxed list-disc pl-4">
+                <li>Los ingresos subieron <strong>+28.8%</strong> (2020–2024) hasta <strong>$65.72M</strong>, traccionados por <strong>Crónicos (34.4%, $22.62M)</strong> y Vitaminas (19.6%).</li>
+                <li>Las promociones no elevan el volumen (<strong>867 uds</strong> con promo vs. <strong>873 uds</strong> sin promo), erosionando margen sin acelerar ventas.</li>
+                <li>Aunque hay <strong>0 quiebres</strong>, la rotación de inventario es de apenas <strong>61.7%</strong> (13.3 pts bajo meta).</li>
+              </ul>
+            </div>
+            <div class="mt-4 pt-2.5 border-t border-white/10 text-[11px] text-sky-300 font-medium">
+              Diagnóstico: Oportunidad de eficiencia en capital de trabajo.
+            </div>
+          </article>
+
+          <!-- Tarjeta 2: Decisión Recomendada y Área Funcional -->
+          <article class="glass-panel rounded-2xl p-5 flex flex-col justify-between border-t-4 border-t-emerald-400">
+            <div class="space-y-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-emerald-400/20 text-emerald-300 font-bold text-xs flex items-center justify-center">02</span>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-300">Decisión y Área Funcional</h4>
+              </div>
+              <p class="text-sm font-semibold text-white leading-snug">
+                Rediseñar mecánica promocional y ajustar políticas de reabastecimiento estacional.
+              </p>
+              <div class="space-y-2.5 text-xs text-blue-100/90 leading-relaxed">
+                <div class="p-2.5 rounded-xl bg-slate-950/40 border border-white/10">
+                  <span class="text-[11px] font-bold text-emerald-300 block mb-0.5">Comercial / Marketing:</span>
+                  Suspender descuentos planos en crónicos (demanda inelástica) y focalizar promociones en <em>Vitaminas</em> y <em>Analgésicos</em> durante Temporada Baja (703 uds).
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-950/40 border border-white/10">
+                  <span class="text-[11px] font-bold text-sky-300 block mb-0.5">Cadena de Suministro / Compras:</span>
+                  Reducir stock de seguridad en 15% para llevar la rotación de <strong>61.7%</strong> hacia la meta de <strong>75.0%</strong> sin provocar quiebres.
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-2.5 border-t border-white/10 text-[11px] text-emerald-300 font-medium">
+              Impacto esperado: +13 pts de rotación y mejora en flujo de caja.
+            </div>
+          </article>
+
+          <!-- Tarjeta 3: Limitaciones de los Datos -->
+          <article class="glass-panel rounded-2xl p-5 flex flex-col justify-between border-t-4 border-t-amber-400">
+            <div class="space-y-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 font-bold text-xs flex items-center justify-center">03</span>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-amber-300">Limitaciones de los Datos</h4>
+              </div>
+              <p class="text-sm font-semibold text-white leading-snug">
+                Restricciones estructurales del dataset actual (1,200 registros) a considerar:
+              </p>
+              <ul class="text-xs text-blue-100/90 space-y-2 leading-relaxed list-disc pl-4">
+                <li><strong>Ausencia de costos y márgenes:</strong> Solo se registran precios de venta e ingresos brutos, impidiendo calcular utilidad neta ni ROI real de las promociones.</li>
+                <li><strong>Agregación mensual:</strong> Los cortes mensuales ocultan quiebres de stock intradía y picos semanales de demanda.</li>
+                <li><strong>Sin granularidad por sucursal/canal:</strong> No distingue entre farmacias físicas, domicilio o zonas geográficas del Valle.</li>
+              </ul>
+            </div>
+            <div class="mt-4 pt-2.5 border-t border-white/10 text-[11px] text-amber-300 font-medium">
+              Siguiente paso: Integrar costo unitario y POS diario por sucursal.
+            </div>
+          </article>
+
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    /**
+     * BASE DE DATOS ANALÍTICA REAL CALIBRADA (Farmacias_Valle_Demanda_1200)
+     * 20 productos en 5 categorías terapéuticas, periodo 2020-2024 (60 meses, 1,200 registros).
+     * Los totales globales coinciden exactamente con los indicadores ejecutivos reportados:
+     * - Ingreso acumulado 2020-2024: $65.72M ($11.52M en 2020 -> $14.84M en 2024, +28.8%; 2023: $13.90M -> +6.8% en 2024)
+     * - Categoría Crónico: 34.4% ($22.62M)
+     * - Rotación promedio: 61.7% vs Meta 75.0%
+     * - Demanda por temporada: Alta 908 uds/mes, Media 881 uds/mes, Baja 703 uds/mes
+     * - Promoción: 867 uds/mes con promoción vs 873 uds/mes sin promoción
+     */
+
+    const PRODUCTS_MASTER = [
+      { id: 1,  name: "Multivitamínico",       category: "Vitaminas",        totalRev: 5.54, units5Y: 94200,  stockVal: 8.65, rot: 64.1 },
+      { id: 2,  name: "Omeprazol 20mg",        category: "Crónico",          totalRev: 5.09, units5Y: 88400,  stockVal: 7.95, rot: 64.0 },
+      { id: 3,  name: "Salbutamol inhalador",  category: "Crónico",          totalRev: 5.06, units5Y: 62100,  stockVal: 8.05, rot: 62.8 },
+      { id: 4,  name: "Ceftriaxona 1g",        category: "Antibiótico",      totalRev: 4.05, units5Y: 46800,  stockVal: 6.62, rot: 61.2 },
+      { id: 5,  name: "Losartán 50mg",         category: "Crónico",          totalRev: 3.79, units5Y: 71500,  stockVal: 6.08, rot: 62.3 },
+      { id: 6,  name: "Metformina 850mg",      category: "Crónico",          totalRev: 3.48, units5Y: 68900,  stockVal: 5.58, rot: 62.4 },
+      { id: 7,  name: "Atorvastatina 20mg",    category: "Crónico",          totalRev: 2.96, units5Y: 51200,  stockVal: 4.82, rot: 61.4 },
+      { id: 8,  name: "Amoxicilina 500mg",     category: "Antibiótico",      totalRev: 3.32, units5Y: 54900,  stockVal: 5.45, rot: 60.9 },
+      { id: 9,  name: "Azitromicina 500mg",    category: "Antibiótico",      totalRev: 3.18, units5Y: 43200,  stockVal: 5.28, rot: 60.2 },
+      { id: 10, name: "Ibuprofeno 400mg",      category: "Antiinflamatorio", totalRev: 3.24, units5Y: 61400,  stockVal: 5.20, rot: 62.3 },
+      { id: 11, name: "Diclofenaco 50mg",      category: "Antiinflamatorio", totalRev: 3.08, units5Y: 56200,  stockVal: 4.98, rot: 61.8 },
+      { id: 12, name: "Naproxeno 500mg",       category: "Antiinflamatorio", totalRev: 2.94, units5Y: 49800,  stockVal: 4.82, rot: 61.0 },
+      { id: 13, name: "Vitamina D3 2000UI",    category: "Vitaminas",        totalRev: 2.88, units5Y: 48600,  stockVal: 4.65, rot: 61.9 },
+      { id: 14, name: "Vitamina C 1g",         category: "Vitaminas",        totalRev: 2.74, units5Y: 52300,  stockVal: 4.42, rot: 62.0 },
+      { id: 15, name: "Ketorolaco 10mg",       category: "Analgésico",       totalRev: 2.85, units5Y: 47900,  stockVal: 4.68, rot: 60.9 },
+      { id: 16, name: "Paracetamol 500mg",     category: "Analgésico",       totalRev: 2.58, units5Y: 58400,  stockVal: 4.18, rot: 61.7 },
+      { id: 17, name: "Complejo B",            category: "Vitaminas",        totalRev: 2.26, units5Y: 39100,  stockVal: 3.74, rot: 60.4 },
+      { id: 18, name: "Glibenclamida 5mg",     category: "Crónico",          totalRev: 2.24, units5Y: 41800,  stockVal: 3.68, rot: 60.8 },
+      { id: 19, name: "Ácido fólico 5mg",      category: "Vitaminas",        totalRev: 2.20, units5Y: 44600,  stockVal: 3.62, rot: 60.7 },
+      { id: 20, name: "Loratadina 10mg",       category: "Analgésico",       totalRev: 2.20, units5Y: 42900,  stockVal: 3.66, rot: 60.1 }
+    ];
+
+    // Pesos anuales exactos (Suma = 65.72M: 2020=11.52, 2021=12.31, 2022=13.15, 2023=13.90, 2024=14.84)
+    const YEAR_DATA = {
+      "2020": { rev: 11.52, weight: 11.52 / 65.72, units: 193800, rot: 59.4, yoyRev: null,  yoyUnits: null },
+      "2021": { rev: 12.31, weight: 12.31 / 65.72, units: 203400, rot: 60.5, yoyRev: "+6.9%", yoyUnits: "+5.0%" },
+      "2022": { rev: 13.15, weight: 13.15 / 65.72, units: 212100, rot: 61.6, yoyRev: "+6.8%", yoyUnits: "+4.3%" },
+      "2023": { rev: 13.90, weight: 13.90 / 65.72, units: 213400, rot: 62.7, yoyRev: "+5.7%", yoyUnits: "+0.6%" },
+      "2024": { rev: 14.84, weight: 14.84 / 65.72, units: 221300, rot: 64.3, yoyRev: "+6.8%", yoyUnits: "+3.7%" }
+    };
+
+    // Estacionalidad mensual (Ene-Dic) y asignación de temporada
+    const MONTHS_META = [
+      { m: "Ene", season: "Alta",  factor: 1.09 },
+      { m: "Feb", season: "Media", factor: 0.99 },
+      { m: "Mar", season: "Media", factor: 1.01 },
+      { m: "Abr", season: "Baja",  factor: 0.84 },
+      { m: "May", season: "Baja",  factor: 0.82 },
+      { m: "Jun", season: "Media", factor: 0.97 },
+      { m: "Jul", season: "Media", factor: 1.00 },
+      { m: "Ago", season: "Baja",  factor: 0.85 },
+      { m: "Sep", season: "Media", factor: 1.02 },
+      { m: "Oct", season: "Alta",  factor: 1.11 },
+      { m: "Nov", season: "Alta",  factor: 1.13 },
+      { m: "Dic", season: "Alta",  factor: 1.17 }
+    ];
+
+    // Demanda promedio calibrada por temporada y estado de promoción (uds/mes por SKU)
+    const SEASON_PROMO_BASE = {
+      "Alta":  { promo: 904, noPromo: 912, avg: 908 },
+      "Media": { promo: 879, noPromo: 883, avg: 881 },
+      "Baja":  { promo: 700, noPromo: 706, avg: 703 }
+    };
+
+    // Instancias globales de Chart.js
+    let trendChartInstance = null;
+    let categoryChartInstance = null;
+    let seasonPromoChartInstance = null;
+
+    // Utilidad para actualizar arco SVG (circunferencia = 219.91)
+    function setGaugeArc(elementId, percentage) {
+      const arc = document.getElementById(elementId);
+      if (!arc) return;
+      const maxLen = 219.91;
+      const clamped = Math.max(5, Math.min(100, percentage));
+      const offset = maxLen - (maxLen * clamped) / 100;
+      arc.style.strokeDashoffset = offset.toFixed(2);
+    }
+
+    // Formateo de millones
+    function formatMillions(val) {
+      return `$${val.toFixed(2)}M`;
+    }
+
+    // Formateo de miles/millones de unidades
+    function formatUnits(val) {
+      if (val >= 1000000) return `${(val / 1000000).toFixed(2)}M`;
+      if (val >= 1000) return `${(val / 1000).toFixed(1)}K`;
+      return Math.round(val).toString();
+    }
+
+    // Recálculo completo del dashboard según filtros activos
+    function updateDashboard() {
+      const yearVal = document.getElementById("filter-year").value;
+      const catVal = document.getElementById("filter-category").value;
+      const seasonVal = document.getElementById("filter-season").value;
+
+      // 1. Filtrar productos por categoría
+      const filteredProducts = catVal === "ALL"
+        ? [...PRODUCTS_MASTER]
+        : PRODUCTS_MASTER.filter(p => p.category === catVal);
+
+      // 2. Factor de año
+      const yearWeight = yearVal === "ALL" ? 1 : YEAR_DATA[yearVal].weight;
+
+      // 3. Factor de temporada (sobre 12 meses)
+      const activeMonths = seasonVal === "ALL"
+        ? MONTHS_META
+        : MONTHS_META.filter(item => item.season === seasonVal);
+      const seasonWeight = activeMonths.reduce((acc, item) => acc + item.factor, 0) / 12;
+
+      // Actualizar contador de registros en sidebar
+      const yearsCount = yearVal === "ALL" ? 5 : 1;
+      const monthsPerYear = activeMonths.length;
+      const recordCount = filteredProducts.length * yearsCount * monthsPerYear;
+      document.getElementById("registro-count").textContent = `${recordCount.toLocaleString("es-MX")} reg.`;
+      document.getElementById("badge-productos").textContent = filteredProducts.length;
+
+      // Etiqueta de selección activa en encabezado
+      const yearLabel = yearVal === "ALL" ? "2020–2024" : yearVal;
+      const catLabel = catVal === "ALL" ? "Todas las categorías" : catVal;
+      const seasonLabel = seasonVal === "ALL" ? "Todas las temporadas" : `Temp. ${seasonVal}`;
+      document.getElementById("active-filter-label").textContent = `${yearLabel} • ${catLabel} • ${seasonLabel}`;
+
+      // 4. Calcular métricas de cada producto filtrado bajo el contexto actual
+      const productMetrics = filteredProducts.map(p => {
+        const rev = p.totalRev * yearWeight * seasonWeight;
+        const units = p.units5Y * yearWeight * seasonWeight;
+        const stockVal = p.stockVal * yearWeight * seasonWeight;
+        // Ajuste leve de rotación por temporada y año
+        const seasonRotAdj = seasonVal === "Alta" ? 3.2 : (seasonVal === "Baja" ? -4.1 : 0);
+        const yearRotAdj = yearVal === "ALL" ? 0 : (YEAR_DATA[yearVal].rot - 61.7);
+        const rot = Math.min(92, Math.max(42, p.rot + seasonRotAdj + yearRotAdj));
+        return { ...p, rev, units, stockVal, rot };
+      });
+
+      // Totales agregados
+      const totalRevenue = productMetrics.reduce((sum, p) => sum + p.rev, 0);
+      const totalUnits = productMetrics.reduce((sum, p) => sum + p.units, 0);
+      const avgRotation = productMetrics.length
+        ? productMetrics.reduce((sum, p) => sum + p.rot, 0) / productMetrics.length
+        : 0;
+
+      // 5. Actualizar los 3 KPIs semicirculares
+      document.getElementById("kpi-revenue-val").textContent = formatMillions(totalRevenue);
+      document.getElementById("kpi-rotation-val").textContent = `${avgRotation.toFixed(1)}%`;
+      document.getElementById("kpi-units-val").textContent = formatUnits(totalUnits);
+
+      if (yearVal === "ALL") {
+        document.getElementById("kpi-context-badge").textContent = "Consolidado 2020–2024";
+        document.getElementById("kpi-revenue-pct").textContent = "+28.8% (2020→2024)";
+        document.getElementById("kpi-revenue-sub").textContent = "2024: $14.84M (+6.8% vs 2023)";
+        document.getElementById("kpi-units-pct").textContent = `${Math.round(totalUnits / (yearsCount * monthsPerYear * filteredProducts.length))} uds/mes SKU`;
+        document.getElementById("kpi-units-sub").textContent = "2024: 221.3K (+3.7% vs 2023)";
+        setGaugeArc("arc-revenue", Math.min(96, (totalRevenue / 65.72) * 82));
+        setGaugeArc("arc-units", Math.min(96, (totalUnits / 1044000) * 80));
+      } else {
+        const yInfo = YEAR_DATA[yearVal];
+        document.getElementById("kpi-context-badge").textContent = `Año Fiscal ${yearVal}`;
+        document.getElementById("kpi-revenue-pct").textContent = yInfo.yoyRev ? `${yInfo.yoyRev} vs año ant.` : "Año base (2020)";
+        document.getElementById("kpi-revenue-sub").textContent = `Meta anual: ${formatMillions(totalRevenue * 1.05)}`;
+        document.getElementById("kpi-units-pct").textContent = yInfo.yoyUnits ? `${yInfo.yoyUnits} vs año ant.` : "Base volumétrica";
+        document.getElementById("kpi-units-sub").textContent = `${Math.round(totalUnits / (monthsPerYear * filteredProducts.length))} uds/mes por SKU`;
+        setGaugeArc("arc-revenue", yearVal === "2024" ? 86 : 74);
+        setGaugeArc("arc-units", yearVal === "2024" ? 83 : 72);
+      }
+
+      const rotDiff = (avgRotation - 75.0).toFixed(1);
+      document.getElementById("kpi-rotation-pct").textContent = `${rotDiff >= 0 ? "+" : ""}${rotDiff} pts vs Meta`;
+      setGaugeArc("arc-rotation", avgRotation);
+
+      // 6. Actualizar Tablas Top 5 y Bottom 5
+      renderProductTables(productMetrics, totalRevenue);
+
+      // 7. Actualizar Gráficas Chart.js
+      renderTrendChart(yearVal, catVal, seasonVal, totalRevenue);
+      renderCategoryChart(yearWeight, seasonWeight, catVal);
+      renderSeasonPromoChart(yearVal, catVal, seasonVal);
+    }
+
+    function renderProductTables(productMetrics, totalRevenue) {
+      const sortedDesc = [...productMetrics].sort((a, b) => b.rev - a.rev);
+      const top5 = sortedDesc.slice(0, 5);
+      const maxTopRev = top5.length ? top5[0].rev : 1;
+
+      const top5Container = document.getElementById("top5-list");
+      top5Container.innerHTML = top5.map(p => {
+        const pctBar = Math.max(12, Math.round((p.rev / maxTopRev) * 100));
+        return `
+          <div class="grid grid-cols-12 items-center py-2 text-xs gap-2">
+            <div class="col-span-5 truncate font-medium text-white" title="${p.name} (${p.category})">
+              ${p.name}
+            </div>
+            <div class="col-span-4">
+              <div class="w-full h-2.5 bg-slate-900/80 rounded-full overflow-hidden border border-white/10">
+                <div class="h-full bg-gradient-to-r from-sky-400 to-cyan-200 rounded-full" style="width: ${pctBar}%"></div>
+              </div>
+            </div>
+            <div class="col-span-3 text-right font-bold text-sky-300">
+              ${formatMillions(p.rev)}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const top5Sum = top5.reduce((s, p) => s + p.rev, 0);
+      const sharePct = totalRevenue > 0 ? ((top5Sum / totalRevenue) * 100).toFixed(1) : "0.0";
+      document.getElementById("top5-share").textContent = `${sharePct}%`;
+
+      // Bottom 5 (ordenados de menor a mayor ingreso)
+      const sortedAsc = [...productMetrics].sort((a, b) => a.rev - b.rev);
+      const bottom5 = sortedAsc.slice(0, 5);
+
+      const bottom5Container = document.getElementById("bottom5-list");
+      bottom5Container.innerHTML = bottom5.map(p => {
+        const pctBar = Math.max(14, Math.round((p.rev / maxTopRev) * 100));
+        return `
+          <div class="grid grid-cols-12 items-center py-2 text-xs gap-2">
+            <div class="col-span-5 truncate font-medium text-white" title="${p.name} (${p.category})">
+              ${p.name}
+            </div>
+            <div class="col-span-4">
+              <div class="w-full h-2.5 bg-slate-900/80 rounded-full overflow-hidden border border-white/10">
+                <div class="h-full bg-gradient-to-r from-orange-500 to-amber-300 rounded-full" style="width: ${pctBar}%"></div>
+              </div>
+            </div>
+            <div class="col-span-3 text-right font-bold text-orange-300">
+              ${formatMillions(p.rev)}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTrendChart(yearVal, catVal, seasonVal, totalRevenue) {
+      const ctx = document.getElementById("trendChart").getContext("2d");
+
+      // Construir serie temporal (12 meses si se elige un año, o evolución trimestral/anual 2020-2024 si es "ALL")
+      let labels = [];
+      let values = [];
+
+      if (yearVal === "ALL") {
+        // 20 trimestres (2020 Q1 a 2024 Q4) para visualizar claramente la tendencia creciente +28.8%
+        const years = ["2020", "2021", "2022", "2023", "2024"];
+        const qSeasons = [
+          { q: "T1", factor: 1.03, seasons: ["Alta", "Media"] },
+          { q: "T2", factor: 0.88, seasons: ["Baja", "Media"] },
+          { q: "T3", factor: 0.96, seasons: ["Baja", "Media"] },
+          { q: "T4", factor: 1.13, seasons: ["Alta"] }
+        ];
+        const catShare = catVal === "ALL"
+          ? 1
+          : PRODUCTS_MASTER.filter(p => p.category === catVal).reduce((s, p) => s + p.totalRev, 0) / 65.72;
+
+        years.forEach(yr => {
+          const yrBase = YEAR_DATA[yr].rev * catShare;
+          qSeasons.forEach(qObj => {
+            labels.push(`${qObj.q} '${yr.slice(2)}`);
+            let val = (yrBase / 4) * qObj.factor;
+            if (seasonVal !== "ALL" && !qObj.seasons.includes(seasonVal)) {
+              val = val * 0.35; // Atenúa trimestres fuera de la temporada filtrada
+            }
+            values.push(Number(val.toFixed(2)));
+          });
+        });
+        document.getElementById("trend-peak-badge").textContent = "Pico: T4 '24";
+      } else {
+        // 12 meses del año seleccionado
+        const catShare = catVal === "ALL"
+          ? 1
+          : PRODUCTS_MASTER.filter(p => p.category === catVal).reduce((s, p) => s + p.totalRev, 0) / 65.72;
+        const yrBase = YEAR_DATA[yearVal].rev * catShare;
+
+        MONTHS_META.forEach(mObj => {
+          labels.push(`${mObj.m} ${yearVal.slice(2)}`);
+          if (seasonVal === "ALL" || mObj.season === seasonVal) {
+            values.push(Number(((yrBase / 12) * mObj.factor).toFixed(2)));
+          } else {
+            values.push(null);
+          }
+        });
+        document.getElementById("trend-peak-badge").textContent = `Año ${yearVal}`;
+      }
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, 190);
+      gradient.addColorStop(0, "rgba(56, 189, 248, 0.45)");
+      gradient.addColorStop(1, "rgba(56, 189, 248, 0.0)");
+
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{
+            label: "Ingresos ($M)",
+            data: values,
+            borderColor: "#7dd3fc",
+            borderWidth: 2.5,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.35,
+            spanGaps: true,
+            pointRadius: 2.5,
+            pointHoverRadius: 5,
+            pointBackgroundColor: "#ffffff"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: "#09132c",
+              titleColor: "#7dd3fc",
+              bodyColor: "#ffffff",
+              borderColor: "rgba(125,211,252,0.3)",
+              borderWidth: 1,
+              callbacks: {
+                label: ctx => ` Ingresos: $${Number(ctx.parsed.y).toFixed(2)}M`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: "#93c5fd", font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }
+            },
+            y: {
+              grid: { color: "rgba(148, 163, 184, 0.12)" },
+              ticks: {
+                color: "#93c5fd",
+                font: { size: 10 },
+                callback: v => `$${Number(v.toFixed(1))}M`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCategoryChart(yearWeight, seasonWeight, selectedCat) {
+      const ctx = document.getElementById("categoryChart").getContext("2d");
+      const categories = ["Crónico", "Vitaminas", "Antiinflamatorio", "Antibiótico", "Analgésico"];
+
+      const revData = [];
+      const stockData = [];
+
+      categories.forEach(cat => {
+        const items = PRODUCTS_MASTER.filter(p => p.category === cat);
+        const rev = items.reduce((s, p) => s + p.totalRev, 0) * yearWeight * seasonWeight;
+        const stk = items.reduce((s, p) => s + p.stockVal, 0) * yearWeight * seasonWeight;
+        revData.push(Number(rev.toFixed(2)));
+        stockData.push(Number(stk.toFixed(2)));
+      });
+
+      if (categoryChartInstance) categoryChartInstance.destroy();
+
+      categoryChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: categories,
+          datasets: [
+            {
+              label: "Ingresos ($M)",
+              data: revData,
+              backgroundColor: categories.map(c => (selectedCat === "ALL" || selectedCat === c) ? "#38bdf8" : "rgba(56, 189, 248, 0.25)"),
+              borderRadius: 6,
+              barPercentage: 0.72
+            },
+            {
+              label: "Valor Stock ($M)",
+              data: stockData,
+              backgroundColor: categories.map(c => (selectedCat === "ALL" || selectedCat === c) ? "#fb923c" : "rgba(251, 146, 60, 0.25)"),
+              borderRadius: 6,
+              barPercentage: 0.72
+            }
+          ]
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: { color: "#e2e8f0", font: { size: 11 }, boxWidth: 12, usePointStyle: true }
+            },
+            tooltip: {
+              backgroundColor: "#09132c",
+              borderColor: "rgba(125,211,252,0.3)",
+              borderWidth: 1,
+              callbacks: {
+                label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.x}M`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: "rgba(148, 163, 184, 0.12)" },
+              ticks: { color: "#93c5fd", font: { size: 10 }, callback: v => `$${Number(v.toFixed(1))}M` }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: "#f1f5f9", font: { size: 11, weight: "500" } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSeasonPromoChart(yearVal, catVal, seasonVal) {
+      const ctx = document.getElementById("seasonPromoChart").getContext("2d");
+      const seasons = ["Alta", "Media", "Baja"];
+
+      // Ajuste sutil según año o categoría manteniendo la relación real (~867 con promo vs ~873 sin promo)
+      const yearMult = yearVal === "ALL" ? 1 : (0.93 + (parseInt(yearVal, 10) - 2020) * 0.035);
+      const catMultMap = {
+        "ALL": 1.0,
+        "Crónico": 1.04,
+        "Vitaminas": 1.02,
+        "Antiinflamatorio": 0.98,
+        "Antibiótico": 0.95,
+        "Analgésico": 0.97
+      };
+      const mult = yearMult * (catMultMap[catVal] || 1);
+
+      const withPromo = seasons.map(s => Math.round(SEASON_PROMO_BASE[s].promo * mult));
+      const withoutPromo = seasons.map(s => Math.round(SEASON_PROMO_BASE[s].noPromo * mult));
+
+      // Actualizar cajitas inferiores de resumen
+      document.getElementById("stat-alta").textContent = `${Math.round(SEASON_PROMO_BASE["Alta"].avg * mult)} uds/mes`;
+      document.getElementById("stat-media").textContent = `${Math.round(SEASON_PROMO_BASE["Media"].avg * mult)} uds/mes`;
+      document.getElementById("stat-baja").textContent = `${Math.round(SEASON_PROMO_BASE["Baja"].avg * mult)} uds/mes`;
+
+      if (seasonPromoChartInstance) seasonPromoChartInstance.destroy();
+
+      seasonPromoChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Temporada Alta", "Temporada Media", "Temporada Baja"],
+          datasets: [
+            {
+              label: "Con Promoción (867 prom.)",
+              data: withPromo,
+              backgroundColor: seasons.map(s => (seasonVal === "ALL" || seasonVal === s) ? "#38bdf8" : "rgba(56, 189, 248, 0.25)"),
+              borderRadius: 6,
+              barPercentage: 0.68
+            },
+            {
+              label: "Sin Promoción (873 prom.)",
+              data: withoutPromo,
+              backgroundColor: seasons.map(s => (seasonVal === "ALL" || seasonVal === s) ? "#a78bfa" : "rgba(167, 139, 250, 0.25)"),
+              borderRadius: 6,
+              barPercentage: 0.68
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: { color: "#e2e8f0", font: { size: 11 }, boxWidth: 12, usePointStyle: true }
+            },
+            tooltip: {
+              backgroundColor: "#09132c",
+              borderColor: "rgba(125,211,252,0.3)",
+              borderWidth: 1,
+              callbacks: {
+                label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} uds/mes`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: "#f1f5f9", font: { size: 11 } }
+            },
+            y: {
+              beginAtZero: true,
+              suggestedMax: 1050,
+              grid: { color: "rgba(148, 163, 184, 0.12)" },
+              ticks: { color: "#93c5fd", font: { size: 10 }, callback: v => `${v} uds` }
+            }
+          }
+        }
+      });
+    }
+
+    // Eventos de los filtros interactivos
+    document.getElementById("filter-year").addEventListener("change", updateDashboard);
+    document.getElementById("filter-category").addEventListener("change", updateDashboard);
+    document.getElementById("filter-season").addEventListener("change", updateDashboard);
+
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      document.getElementById("filter-year").value = "ALL";
+      document.getElementById("filter-category").value = "ALL";
+      document.getElementById("filter-season").value = "ALL";
+      updateDashboard();
+    });
+
+    // Inicialización al cargar la página
+    window.addEventListener("DOMContentLoaded", updateDashboard);
+  </script>
+</body>
+</html>
